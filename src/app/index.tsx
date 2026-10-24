@@ -1,98 +1,158 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { useState } from 'react';
+import {
+  Alert,
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+import InfoCard from '../components/InfoCard';
+
+const DAFTAR_MAHASISWA = [
+  { id: '1', nama: 'Alifia Putri', prodi: 'Sistem Informasi' },
+  { id: '2', nama: 'Budi Santoso', prodi: 'Teknologi Informasi' },
+  { id: '3', nama: 'Citra Dewi', prodi: 'Sistem Informasi' },
+  { id: '4', nama: 'Dimas Anggara', prodi: 'Teknik Informatika' },
+  { id: '5', nama: 'Eka Nur Safitri', prodi: 'Sistem Informasi' },
+];
+
+export default function App() {
+  const [keyword, setKeyword] = useState('');
+
+  const mahasiswaFiltered = DAFTAR_MAHASISWA.filter(
+    (mahasiswa) =>
+      mahasiswa.nama.toLowerCase().includes(keyword.toLowerCase())
   );
-}
 
-export default function HomeScreen() {
+ const renderMahasiswa = ({ item }: { item: { id: string; nama: string; prodi: string } }) => (
+    <View style={styles.studentCard}>
+      <Text style={styles.studentName}>{item.nama}</Text>
+      <Text style={styles.prodi}>{item.prodi}</Text>
+    </View>
+  );
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={mahasiswaFiltered}
+        keyExtractor={(item) => item.id}
+        renderItem={renderMahasiswa}
+        ListHeaderComponent={
+          <View>
+            <Text style={styles.header}>UTS Pemrograman Mobile</Text>
+            <Text style={styles.subtitle}>
+              Soal 1: Custom Reusable Component
+            </Text>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+            <InfoCard
+              title="Membuat Halaman Login"
+              status="selesai"
+              onPress={() =>
+                Alert.alert('Detail', 'Tugas halaman login telah selesai.')
+              }
+            />
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+            <InfoCard
+              title="Membuat Fitur Pencarian"
+              status="proses"
+              onPress={() =>
+                Alert.alert('Detail', 'Tugas fitur pencarian sedang diproses.')
+              }
+            />
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+            <Text style={styles.subtitle}>
+              Soal 2: Direktori Mahasiswa
+            </Text>
+
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Cari nama mahasiswa..."
+              value={keyword}
+              onChangeText={setKeyword}
+              autoCapitalize="none"
+            />
+
+            <Text style={styles.resultTitle}>
+              Daftar Mahasiswa ({mahasiswaFiltered.length})
+            </Text>
+          </View>
+        }
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>
+            Data tidak ditemukan!
+          </Text>
+        }
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    backgroundColor: '#F3F4F6',
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+  content: {
+    padding: 20,
+    paddingTop: 15,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1E3A8A',
+    marginBottom: 8,
   },
-  title: {
+  subtitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#374151',
+    marginTop: 18,
+    marginBottom: 14,
+  },
+  searchInput: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    fontSize: 16,
+    marginBottom: 15,
+  },
+  resultTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1F2937',
+    marginBottom: 10,
+  },
+  studentCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 10,
+    borderLeftWidth: 4,
+    borderLeftColor: '#2563EB',
+  },
+  studentName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#111827',
+  },
+  prodi: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginTop: 5,
+  },
+  emptyText: {
     textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+    color: '#DC2626',
+    fontSize: 16,
+    marginTop: 20,
   },
 });
